@@ -4,8 +4,8 @@ env:
     # This S3 bucket is used to store the packaged Lambda deployment bundle.
     # Make sure to provide a valid S3 bucket name (it must exist already).
     # The CodeBuild IAM role must allow write access to it.
-    S3_BUCKET: "theilliminationgameapi"
-    PACKAGE: "github.com/maisiesadler/TheIlliminationGameApi"
+    S3_BUCKET: "theilliminationgamewsapi"
+    PACKAGE: "github.com/maisiesadler/TheIlliminationGameWebSocketsApi"
 
 phases:
   install:
