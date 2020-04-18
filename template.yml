@@ -51,15 +51,9 @@ Resources:
     Properties:
       ApiId: !Ref IlliminationWsApi
       IntegrationType: AWS
-      IntegrationUri: !Join 
-        - ''
-        - - 'arn:'
-          - !Ref 'AWS::Partition'
-          - ':apigateway:'
-          - !Ref 'AWS::Region'
-          - ':lambda:path/2015-03-31/functions/'
-          - !Ref default.Arn
-          - /invocations
+      IntegrationUri:
+      Fn::Sub:
+        arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${default.Arn}/invocations
   TestRoute:
     Type: AWS::ApiGatewayV2::Route
     DependsOn:
