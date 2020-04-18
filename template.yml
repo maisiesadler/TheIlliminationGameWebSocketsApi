@@ -44,20 +44,10 @@ Resources:
       VpcConfig:
         SecurityGroupIds: !Ref SecurityGroupIds
         SubnetIds: !Ref VpcSubnetIds
-  TestRoute:
-    Type: AWS::ApiGatewayV2::Route
-    DependsOn:
-      - TestLambdaIntegration
-    Properties:
-      ApiId: !Ref IlliminationWsApi
-      RouteKey: test
-      AuthorizationType: NONE
-      Target: !Join
-        - '/'
-        - - 'integrations'
-          - !Ref TestLambdaIntegration
   TestLambdaIntegration:
     Type: AWS::ApiGatewayV2::Integration
+    DependsOn:
+      - default
     Properties:
       ApiId: !Ref IlliminationWsApi
       IntegrationType: AWS
@@ -70,3 +60,15 @@ Resources:
           - ':lambda:path/2015-03-31/functions/'
           - !Ref default
           - /invocations
+  TestRoute:
+    Type: AWS::ApiGatewayV2::Route
+    DependsOn:
+      - TestLambdaIntegration
+    Properties:
+      ApiId: !Ref IlliminationWsApi
+      RouteKey: test
+      AuthorizationType: NONE
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref TestLambdaIntegration
