@@ -29,18 +29,6 @@ Resources:
       Name: IlliminationWsApi
       ProtocolType: WEBSOCKET
       RouteSelectionExpression: "$request.body.action"
-      Auth:
-        Authorizers:
-          CognitoAuthorizer:
-            UserPoolArn: !Ref CognitoAuthorizerArn
-  ConnectRoute:
-    Type: AWS::ApiGatewayV2::Route
-    Properties:
-      ApiId: !Ref IlliminationWsApi
-      RouteKey: "$connect"
-      AuthorizationType: AWS_IAM
-      OperationName: ConnectRoute
-      AuthorizerId: !Ref CognitoAuthorizer
   default:
     Type: AWS::Serverless::Function
     Properties:
@@ -58,11 +46,12 @@ Resources:
         SubnetIds: !Ref VpcSubnetIds
   TestRoute:
     Type: AWS::ApiGatewayV2::Route
+    DependsOn:
+      - TestLambdaIntegration
     Properties:
       ApiId: !Ref IlliminationWsApi
       RouteKey: test
       AuthorizationType: NONE
-      OperationName: TestRoute
       Target: !Join
         - '/'
         - - 'integrations'
@@ -71,5 +60,5 @@ Resources:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
       ApiId: !Ref IlliminationWsApi
-      IntegrationType: AWS_PROXY
+      IntegrationType: AWS
       IntegrationUri: !Ref default
