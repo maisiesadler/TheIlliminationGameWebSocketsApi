@@ -38,7 +38,7 @@ Resources:
     Properties:
       ApiId: !Ref IlliminationWsApi
       RouteKey: "$connect"
-      AuthorizationType: CUSTOM
+      AuthorizationType: AWS_IAM
       OperationName: ConnectRoute
       AuthorizerId: !Ref CognitoAuthorizer
   default:
