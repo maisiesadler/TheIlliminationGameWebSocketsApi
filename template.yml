@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+  SecurityGroupIds: 
+    Type: List<AWS::EC2::SecurityGroup::Id>
+    Description: Security Group IDs that Lambda will use
+  VpcSubnetIds: 
+      Type: List<AWS::EC2::Subnet::Id>
+      Description: VPC Subnet IDs that Lambda will use (min 2 for HA)
+  LambdaRoleArn:
+    Type: String
+    Description: Role arn for serverless function to use
+  CognitoAuthorizerArn:
+    Type: String
+    Description: User pool arn to be used for auth
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: the-illimination-game-ws-api
+    Description: The Illimination Game WebSockets Api
+    Author: Maisie Sadler
+    SourceCodeUrl: https://github.com/maisiesadler/TheIlliminationGameWebSocketsApi
+    ReadmeUrl: README.md
+
+Resources:
+  IlliminationWsApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: IlliminationWsApi
+      ProtocolType: WEBSOCKET
+      RouteSelectionExpression: "$request.body.action"
+      Auth:
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !Ref CognitoAuthorizerArn
+  ConnectRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IlliminationWsApi
+      RouteKey: "$connect"
+      AuthorizationType: CUSTOM
+      OperationName: ConnectRoute
+      AuthorizerId: !Ref CognitoAuthorizer
+  default:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: bin/
+      Handler: /default
+      Runtime: go1.x
+      Tracing: Active
+      Role: !Ref LambdaRoleArn
+      Policies:
+        - VPCAccessPolicy: {}
+        # This policy gives permission for Lambdas to create/manage ENIs
+        # SAM Policy templates you can use: https://github.com/awslabs/serverless-application-model/blob/develop/examples/2016-10-31/policy_templates/all_policy_templates.yaml
+      VpcConfig:
+        SecurityGroupIds: !Ref SecurityGroupIds
+        SubnetIds: !Ref VpcSubnetIds
+  TestRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref IlliminationWsApi
+      RouteKey: test
+      AuthorizationType: NONE
+      OperationName: TestRoute
+      Target: !Join
+        - '/'
+        - - 'integrations'
+          - !Ref TestLambdaIntegration
+  TestLambdaIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref IlliminationWsApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Ref default

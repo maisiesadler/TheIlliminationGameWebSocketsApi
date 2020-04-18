@@ -1,0 +1,37 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+  SecurityGroupIds: 
+    Type: List<AWS::EC2::SecurityGroup::Id>
+    Description: Security Group IDs that Lambda will use
+  VpcSubnetIds: 
+      Type: List<AWS::EC2::Subnet::Id>
+      Description: VPC Subnet IDs that Lambda will use (min 2 for HA)
+  LambdaRoleArn:
+    Type: String
+    Description: Role arn for serverless function to use
+  CognitoAuthorizerArn:
+    Type: String
+    Description: User pool arn to be used for auth
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: the-illimination-game-api
+    Description: The Illimination Game Api
+    Author: Maisie Sadler
+    SourceCodeUrl: https://github.com/maisiesadler/TheIlliminationGameApi
+    ReadmeUrl: README.md
+
+Resources:
+  IlliminationApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      Cors:
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowMethods: "'OPTIONS,POST,GET,PUT,DELETE'"
+        AllowOrigin: "'*'"
+      Auth:
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !Ref CognitoAuthorizerArn
