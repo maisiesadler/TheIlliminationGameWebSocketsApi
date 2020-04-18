@@ -61,4 +61,12 @@ Resources:
     Properties:
       ApiId: !Ref IlliminationWsApi
       IntegrationType: AWS
-      IntegrationUri: !Ref default
+      IntegrationUri: !Join 
+        - ''
+        - - 'arn:'
+          - !Ref 'AWS::Partition'
+          - ':apigateway:'
+          - !Ref 'AWS::Region'
+          - ':lambda:path/2015-03-31/functions/'
+          - !Ref default
+          - /invocations
