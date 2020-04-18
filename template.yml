@@ -58,7 +58,7 @@ Resources:
           - ':apigateway:'
           - !Ref 'AWS::Region'
           - ':lambda:path/2015-03-31/functions/'
-          - !Ref default
+          - !Ref default.Arn
           - /invocations
   TestRoute:
     Type: AWS::ApiGatewayV2::Route
